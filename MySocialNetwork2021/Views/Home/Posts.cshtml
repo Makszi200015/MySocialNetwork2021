@@ -1,0 +1,119 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject MySocialNetwork2021.Services.PostService post
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<h1>@Localizer["Posts"]</h1>
+<div>
+    <input type="button" value="@Localizer["eng"]" onclick="location.replace('../../Home/Posts/?culture=en')" />
+    <input type="button" value="@Localizer["ru"]" onclick="location.replace('../../Home/Posts/?culture=ru')" />
+</div>
+<div class="text-center">
+    <div>
+        <div class="p-x-1 p-y-3">
+            <form class="card card-block m-x-auto bg-faded form-width" id="FormAccountActivation">
+                <legend class="m-b-1 text-xs-center">@Localizer["Write"]</legend>
+                <input type="text" id="postText" title="PostText" />
+                <div class="text-xs-center">
+                    <input type="button" class="btn btn-outline-primary" onclick="AddPost('@User.Identity.Name')" value="@Localizer["Save"]" />
+                </div>
+            </form>
+        </div>
+        <input type="button" onclick="Delete()" value="@Localizer["Delete"]" />
+    </div>
+    <div>
+        @if (post.GetSortList(User.Identity.Name) != null)
+        {
+            @foreach (var item in post.GetSortList(User.Identity.Name))
+            {
+                <div style="margin-top:15px">
+                    <input type="checkbox" class="checkbox" id="@item.Id" />
+                    <label>@item.Text</label>
+                    <input type="button" onclick="UpdateForm()" id="open" value="@Localizer["Update"]" />
+                    <label id="labelNewPost" style="display:none">@Localizer["Write"]</label>
+                    <input type="text" id="newPost" style="display:none;margin: 0 auto;" />
+                    <input type="button" style=" display: none; margin: 0 auto;" id="formButton" onclick="Update('@item.Id')" value="@Localizer["Update"]" />
+                </div>
+            }
+        }
+        else
+        {
+            <label>You don't have a post</label>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    function AddPost(login) {
+
+        var Post =
+        {
+            Text: document.getElementById("postText").value
+        };
+        $.ajax({
+            url: `../../../../api/WebApiPost/Add?login=${login}`,
+            type: 'POST',
+            data: JSON.stringify(Post),
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["Successfully"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Wrong"]");
+            }
+        });
+    }
+
+    function Delete() {
+
+        var photos = document.getElementsByClassName("checkbox");
+        var checkedPhotos = [];
+        for (var i = 0; i < photos.length; i++) {
+            if (photos[i].checked) {
+                checkedPhotos.push(parseInt(photos[i].id));
+            }
+        }
+        $.ajax({
+            url: `../../../../api/WebApiPost/Delete`,
+            type: 'POST',
+            data: JSON.stringify(checkedPhotos),
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["Successfully"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Wrong"]");
+            }
+        });
+    }
+
+    function Update(id) {
+        var newPost = document.getElementById("newPost").value;
+        $.ajax({
+            url: `../../../../api/WebApiPost/Update?id=${id}&newPost=${newPost}`,
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["Successfully"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Wrong"]");
+            }
+        });
+    }
+
+    function UpdateForm() {
+        document.getElementById("newPost").style.display = "block";
+        document.getElementById("formButton").style.display = "block";
+        document.getElementById("labelNewPost").style.display = "block";
+        document.getElementById("open").style.display = "none";
+    }
+
+</script>

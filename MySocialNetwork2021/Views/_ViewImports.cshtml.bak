@@ -1,0 +1,3 @@
+﻿@using MySocialNetwork2021
+@using MySocialNetwork2021.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

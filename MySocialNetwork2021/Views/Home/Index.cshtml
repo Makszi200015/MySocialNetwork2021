@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject MySocialNetwork2021.Services.AccountService accountService
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<div>
+    <input type="button" value="@Localizer["eng"]" onclick="location.replace('../../../?culture=en')"/>
+    <input type="button" value="@Localizer["ru"]" onclick="location.replace('../../../?culture=ru')"/>
+</div>
+<div class="text-center">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        @if (accountService.IsAccountExist(User.Identity.Name))
+        {
+    <label>@Localizer["Active"]</label>
+            <input type="button" class="btn btn-outline-primary" onclick="location.replace('../Home/Posts')" value="@Localizer["Posts"]" />
+            <input type="button" class="btn btn-outline-primary" onclick="location.replace('../Home/News')" value="@Localizer["News"]" />
+            <input type="button" class="btn btn-outline-primary" onclick="location.replace('../Home/Users')" value="@Localizer["Users"]" />
+            <input type="button" class="btn btn-outline-primary" onclick="location.replace('../Home/Friends')" value="@Localizer["Friends"]" />
+            <input type="button" class="btn btn-outline-primary" onclick="location.replace('../Home/Bans')" value="@Localizer["Bans"]" />
+            <input type="button" class="btn btn-outline-primary" onclick="location.replace('../Home/MyPhotos')" value="@Localizer["MyPhotos"]" />
+            <input type="button" class="btn btn-outline-primary" onclick="location.replace('../Home/MyPhotoAlbum')" value="@Localizer["MyPhotoAlbums"]" />
+
+        }
+        else
+        {
+            <div class="p-x-1 p-y-3">
+                <form class="card card-block m-x-auto bg-faded form-width" id="FormAccountActivation">
+                    <legend class="m-b-1 text-xs-center">@Localizer["Activate"]</legend>
+                    <div class="text-xs-center">
+                        <input type="button" class="btn btn-outline-primary" onclick="Activate('@User.Identity.Name')" value="@Localizer["Activate"]" />
+                    </div>
+                </form>
+            </div>
+        }
+    }
+    else
+    {
+<h1 class="display-4">@Localizer["Welcome"]</h1>
+    }
+</div>
+
+<script type="text/javascript">
+    function Activate(login) {
+        debugger
+
+        var Account =
+        {
+            AccountName: login
+        };
+        $.ajax({
+            url: `../../../../api/WebApiAccount/Add?login=${login}`,
+            type: 'POST',
+            data: JSON.stringify(Account),
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["Successfully"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Wrong"]");
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject MySocialNetwork2021.Services.PostService post
+@inject MySocialNetwork2021.Services.NewsService news
+@inject MySocialNetwork2021.Services.AccountService account
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<h1>@Localizer["News"]</h1>
+<div>
+    <input type="button" value="@Localizer["eng"]"onclick="location.replace('../../Home/News/?culture=en')" />
+    <input type="button" value="@Localizer["ru"]" onclick="location.replace('../../Home/News/?culture=ru')" />
+</div>
+
+<div class="text-center">
+
+    <div>
+        @if (news.GetList() != null)
+        {
+            @foreach (var item in post.GetList())
+            {
+                <div style="height: 25px;border: 2px solid;margin-top: 15px;text-align: start;height: 100%;">
+                    <label style="width:40%">@account.GetMyAccount(null, item.AccountId, "Id").AccountName</label>
+                    <label>@item.Text</label>
+                </div>
+            }
+        }
+        else
+        {
+            <label>You don't have a post</label>
+        }
+    </div>
+</div>

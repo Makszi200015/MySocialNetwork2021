@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject MySocialNetwork2021.Services.FriendService friends
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<h1>@Localizer["Ban"]</h1>
+<div>
+    <input type="button" value="@Localizer["eng"]" onclick="location.replace('../../Home/Bans/?culture=en')" />
+    <input type="button" value="@Localizer["ru"]" onclick="location.replace('../../Home/Bans/?culture=ru')" />
+</div>
+<div class="text-center">
+
+    <div>
+        @if (SignInManager.IsSignedIn(User))
+        {
+            if (friends.GetStatusFriends(User.Identity.Name) != null)
+            {
+                @foreach (var us in friends.GetStatusFriends(User.Identity.Name))
+                {
+                    @if (us.IsBun)
+                    {
+                        <div class="container size">
+                            <div class="col-md-3 col-sm-8 templatemo_servicetxt">
+                                <h2></h2>
+                                <p id="@us.Username" style="font-size: 1.5vw;">@us.Username</p>
+
+                                <button type="button" class="btn btn-success">@Localizer["Added to Ban"]</button>
+
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        }
+    </div>
+</div>

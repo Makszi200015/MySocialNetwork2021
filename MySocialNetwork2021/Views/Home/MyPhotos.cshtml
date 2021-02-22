@@ -1,0 +1,81 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject MySocialNetwork2021.Services.PhotoService phoroService
+@inject MySocialNetwork2021.Services.AccountService accountService
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+
+<h1>@Localizer["MyPhotos"]</h1>
+<div>
+    <input type="button" value="@Localizer["eng"]" onclick="location.replace('../../Home/MyPhotos/?culture=en')" />
+    <input type="button" value="@Localizer["ru"]" onclick="location.replace('../../Home/MyPhotos/?culture=ru')" />
+</div>
+<div class="text-center">
+    <h3>@Localizer["Select"]</h3>
+    <form asp-action="Add" asp-controller="WebApiPhoto" method="post" enctype="multipart/form-data">
+        <input type="file" name="uploadedFile" /><br>
+        <input type="submit" value="@Localizer["Download"]" />
+    </form>
+
+    <h3>@Localizer["All"]</h3>
+    @if (phoroService.GetList() != null)
+    {
+        @foreach (var f in phoroService.GetList())
+        {
+            <p>
+                <img style="height:150px;width:150px" src="@Url.Content(f.Name)">
+                <input type="checkbox" class="checkbox" id="@f.Id" />
+            </p>
+        }
+    }
+    <input type="button" onclick="Delete()" value="@Localizer["Delete"]" />
+</div>
+
+<script type="text/javascript">
+    function AddPhoto(login) {
+
+        uploadedFile = document.getElementById("uploadedFile").value;
+        $.ajax({
+            url: `../../../../api/WebApiPhoto/Add?uploadedFile=${uploadedFile}&login=${login}`,
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["AddPhoto"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Wrong"]");
+            }
+        });
+    }
+
+
+    function Delete() {
+
+        var photos = document.getElementsByClassName("checkbox");
+        var checkedPhotos = [];
+        for (var i = 0; i < photos.length; i++) {
+            if (photos[i].checked) {
+                checkedPhotos.push(parseInt(photos[i].id));
+            }
+        }
+        $.ajax({
+            url: `../../../../api/WebApiPhoto/Delete`,
+            type: 'POST',
+            data: JSON.stringify(checkedPhotos),
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["DeletePhoto"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Wrong"]");
+            }
+        });
+    }
+</script>

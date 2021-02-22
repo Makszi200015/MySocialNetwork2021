@@ -1,0 +1,180 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject MySocialNetwork2021.Services.PhotoService phoroService
+@inject MySocialNetwork2021.Services.PhotoAlbumService phoroAlbumService
+@inject MySocialNetwork2021.Services.AccountService accountService
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+
+<h1>@Localizer["MyPhotoAlbum"]</h1>
+<div>
+    <input type="button" value="@Localizer["eng"]" onclick="location.replace('../../Home/MyPhotoAlbum/?culture=en')" />
+    <input type="button" value="@Localizer["ru"]" onclick="location.replace('../../Home/MyPhotoAlbum/?culture=ru')" />
+</div>
+<input type="button" onclick="OpenPhoto()" value="@Localizer["CreateNewAlbum"]" />
+<div class="text-center" style="display:none;" id="Photos">
+    <h3>@Localizer["All"]</h3>
+    <input type="text" id="AlbumName" placeholder="@Localizer["Name"]" />
+    @if (phoroService.GetMyPhoto(User.Identity.Name) != null)
+    {
+        @foreach (var f in phoroService.GetMyPhoto(User.Identity.Name))
+        {
+            <p>
+                <img style="width:150px; height:150px" src="@Url.Content(f.Name)">
+                <input type="checkbox" class="checkbox" id="@f.Id" />
+            </p>
+        }
+    }
+    <input type="button" onclick="AddAlbum()" value="@Localizer["Create"]" />
+</div>
+<div class="text-center" style="display:none;" id="NewPhotos">
+    <h3>@Localizer["All"]</h3>
+    @if (phoroService.GetMyPhoto(User.Identity.Name) != null)
+    {
+        @foreach (var f in phoroService.GetMyPhoto(User.Identity.Name))
+        {
+            <p>
+                <img style="width:150px; height:150px" src="@Url.Content(f.Name)">
+                <input type="checkbox" class="checkbox" id="@f.Id" />
+            </p>
+        }
+    }
+    <input type="button" onclick="AddPhotoInAlbum()" id="" class="Mybutton" value="@Localizer["Add"]" />
+</div>
+
+<div>
+    @if (phoroAlbumService.GetSortList(User.Identity.Name) != null)
+    {
+        @foreach (var item in phoroAlbumService.GetSortList(User.Identity.Name))
+        {
+            <div>
+                <input type="checkbox" class="albumCheckbox" id="@item.Id" />
+                <label>@item.AlbumName</label>
+                <input type="button" onclick="OpenNewPhoto('@item.Id')" value="@Localizer["AddPhoto"]" />
+                <input type="button" onclick="DeletePhoto()" value="@Localizer["Delete"]" />
+                <input type="button" onclick="DeleteAlbum()" value="@Localizer["DeleteAlbum"]" />
+                @foreach (var photo in item.Photos)
+                {
+                    <img style="width:150px; height:150px" src="@Url.Content(photo.Name)">
+                    <input type="checkbox" class="checkboxInAlbum" id="@photo.Id" />
+                }
+            </div>
+
+        }
+    }
+</div>
+
+<script type="text/javascript">
+    function OpenPhoto() {
+        document.getElementById("Photos").style.display = "block";
+    }
+
+    function OpenNewPhoto(id) {
+        document.getElementById("NewPhotos").style.display = "block";
+        document.getElementsByClassName("Mybutton")[0].id = id;
+    }
+
+    function AddAlbum() {
+        var photos = document.getElementsByClassName("checkbox");
+        var checkedPhotos = [];
+        for (var i = 0; i < photos.length; i++) {
+            if (photos[i].checked) {
+                checkedPhotos.push(parseInt(photos[i].id));
+            }
+        }
+        var AlbumName = document.getElementById("AlbumName").value;
+
+        $.ajax({
+            url: `../../../../api/WebApiPhotoAlbum/Add?photoAlbumName=${AlbumName}`,
+            type: 'POST',
+            data: JSON.stringify(checkedPhotos),
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["Album"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Data"]");
+            }
+        });
+    }
+
+    function AddPhotoInAlbum() {
+        var photos = document.getElementsByClassName("checkbox");
+        var checkedPhotos = [];
+        for (var i = 0; i < photos.length; i++) {
+            if (photos[i].checked) {
+                checkedPhotos.push(parseInt(photos[i].id));
+            }
+        }
+        var id = parseInt(document.getElementsByClassName("Mybutton")[0].id);
+
+        $.ajax({
+            url: `../../../../api/WebApiPhotoAlbum/Update?id=${id}`,
+            type: 'POST',
+            data: JSON.stringify(checkedPhotos),
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["AddPhoto"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Data"]");
+            }
+        });
+    }
+
+    function DeletePhoto() {
+
+        var photos = document.getElementsByClassName("checkboxInAlbum");
+        var checkedPhotos = [];
+        for (var i = 0; i < photos.length; i++) {
+            if (photos[i].checked) {
+                checkedPhotos.push(parseInt(photos[i].id));
+            }
+        }
+        $.ajax({
+            url: `../../../../api/WebApiPhotoAlbum/DeletePhoto`,
+            type: 'POST',
+            data: JSON.stringify(checkedPhotos),
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["DeletePhoto"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Data"]");
+            }
+        });
+    }
+
+    function DeleteAlbum() {
+
+        var photos = document.getElementsByClassName("albumCheckbox");
+        var checkedPhotos = [];
+        for (var i = 0; i < photos.length; i++) {
+            if (photos[i].checked) {
+                checkedPhotos.push(parseInt(photos[i].id));
+            }
+        }
+        $.ajax({
+            url: `../../../../api/WebApiPhotoAlbum/Delete`,
+            type: 'POST',
+            data: JSON.stringify(checkedPhotos),
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["DeleteMyAlbum"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Data"]");
+            }
+        });
+    }
+
+</script>

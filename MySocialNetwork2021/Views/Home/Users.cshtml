@@ -1,0 +1,103 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject MySocialNetwork2021.Services.FriendService friend
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<h1>@Localizer["Users"]</h1>
+<div>
+    <input type="button" value="@Localizer["eng"]" onclick="location.replace('../../Home/Users/?culture=en')" />
+    <input type="button" value="@Localizer["ru"]" onclick="location.replace('../../Home/Users/?culture=ru')" />
+</div>
+<div class="text-center">
+
+    <div>
+        @if (friend.GetStatusFriends(User.Identity.Name) != null)
+        {
+            @foreach (var us in friend.GetStatusFriends(User.Identity.Name))
+            {
+                <div class="col-md-3 col-sm-8 templatemo_servicetxt">
+                    <h2></h2>
+                    <p id="@us.Username" style="font-size: 1.5vw;">@us.Username</p>
+                    @switch (us.Status)
+                    {
+                        case 1:
+                            {
+                <button type="button" onclick="AddFriend('@User.Identity.Name','@us.Username')" class="btn btn-info">@Localizer["Subscribe"]</button>
+                                break;
+                            }
+                        case 2:
+                            {
+                <button type="button" onclick="AddFriend('@User.Identity.Name','@us.Username')" class="btn btn-info">@Localizer["Subscribe in reply"]</button>
+                                break;
+                            }
+                        case 3:
+                            {
+                <button type="button" onclick="AddFriend('@User.Identity.Name','@us.Username')" class="btn btn-secondary">@Localizer["You are a subscriber"]</button>
+                                break;
+                            }
+                        case 4:
+                            {
+                <button type="button" onclick="AddFriend('@User.Identity.Name','@us.Username')" class="btn btn-success">@Localizer["You are friends"]</button>
+                                break;
+                            }
+
+                    }
+                    @if (us.IsBun)
+                    {
+                <button type="button" class="btn btn-success">@Localizer["Added to Ban"]</button>
+                    }
+                    else if (us.IInBun)
+                    {
+                <button type="button" class="btn btn-success">@Localizer["You are added to the Ban"]</button>
+                    }
+                    else
+                    {
+                <button type="button" onclick="AddBan('@User.Identity.Name','@us.Username')" class="btn btn-success">@Localizer["Add to Ban"]</button>
+                    }
+
+                </div>
+            }
+        }
+        else
+        {
+            <label>You don't have a post</label>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    function AddFriend(login1, login2) {
+        $.ajax({
+            url: `../../../../api/WebApiFriend/Add?login1=${login1}&login2=${login2}`,
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["Successfully"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Wrong"]");
+            }
+        });
+    }
+
+    function AddBan(login1, login2) {
+        $.ajax({
+            url: `../../../../api/WebApiBan/Add?login1=${login1}&login2=${login2}`,
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                alert("@Localizer["Successfully"]");
+                window.location.reload();
+            },
+            error: function (data) {
+                alert("@Localizer["Wrong"]");
+            }
+        });
+    }
+
+</script>
